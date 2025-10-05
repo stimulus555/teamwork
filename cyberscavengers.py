@@ -8,8 +8,6 @@ import plotly.express as px
 import pandas as pd
 import numpy as np
 
-# --- Configuration ---
-# Set page configuration for a modern, wide layout
 st.set_page_config(
     page_title="NASA APOD Viewer",
     page_icon="🚀",
@@ -19,10 +17,10 @@ st.set_page_config(
 
 # === NASA APOD API ===
 API_URL = "https://api.nasa.gov/planetary/apod"
-# NOTE: Using NASA's official DEMO_KEY for reproducibility and security.
+
 API_KEY = "eG6R1CynmBgOLFdCvMEi5s0oAeTRjXNEAYlqUifW" 
 
-# --- Solar System APOD Dates for Easy Access (NEW LIST) ---
+# --- Solar System APOD Dates for Easy Access  ---
 SOLAR_APOD_DATES = {
     "Select a Solar Event Date": None,
     "Saturn's Rings (2023-09-02)": "2023-09-02",
@@ -111,7 +109,7 @@ manual_date = st.sidebar.date_input(
     max_value=date.today(),
     min_value=date(1995, 6, 16) # APOD start date
 )
-# Convert the date object to the required string format
+# Converting the date object to the required string format
 manual_date_str = manual_date.strftime("%Y-%m-%d")
 
 
@@ -274,4 +272,5 @@ if fetch_date:
         
     except Exception as e:
         st.error(f"An error occurred while fetching the APOD: {e}")
+
         st.info("Please ensure the date is correctly formatted (YYYY-MM-DD) and not a future date.")
