@@ -35,6 +35,9 @@ SOLAR_APOD_DATES = {
     "Hydrogen Clouds of M33 (2023-10-13)": "2023-10-13",
     "The Changing Ion Tail of Comet Pons-Brooks (2024-04-08)": "2024-04-08",
     "The Large Magellanic Cloud Galaxy (2024-10-02)": "2024-10-02",
+    "Athena to the Moon (2025-02-28)": "2025-02-28",
+    "Deimos Before Sunrise (2025-05-24)": "2025-05-24",
+    
 }
 
 # --- Manual Exclusion List (Dates that match keywords but are actually deep space) ---
@@ -274,5 +277,6 @@ if fetch_date:
     except Exception as e:
         st.error(f"An error occurred while fetching the APOD: {e}")
         st.info("Please ensure the date is correctly formatted (YYYY-MM-DD) and not a future date.")
+
 
 
