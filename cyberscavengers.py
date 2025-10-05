@@ -23,7 +23,7 @@ API_KEY = "eG6R1CynmBgOLFdCvMEi5s0oAeTRjXNEAYlqUifW"
 # --- Solar System APOD Dates for Easy Access (Confirmed Solar Events) ---
 SOLAR_APOD_DATES = {
     "Select a Solar Event Date": None,
-    "Saturn's Rings (2025-04-29)": "2025-04-29",
+    "Saturn's Rings Appear to Disappear (2025-04-29)": "2025-04-29",
     "Comet Pons-Brooks in Northern Spring (2024-03-09)": "2024-03-09",
     
     "Luvovna Full moon (2022-07-15)": "2022-07-15",
@@ -277,6 +277,7 @@ if fetch_date:
     except Exception as e:
         st.error(f"An error occurred while fetching the APOD: {e}")
         st.info("Please ensure the date is correctly formatted (YYYY-MM-DD) and not a future date.")
+
 
 
 
