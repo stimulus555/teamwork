@@ -30,8 +30,8 @@ SOLAR_APOD_DATES = {
     "Earth and the Moon (2021-09-05)": "2021-09-05",
     "GW Orionis: A Star System with Tilted Rings (2020-09-29)": "2020-09-29",
     "NGC 3717: A Nearly Sideways Spiral Galaxy (2019-11-12)": "2019-11-12",
-    "Fox Fur, Cone, and Christmas Tree (2024-10-24)": "2024-10-24",
-    "The Persistence of Moonlight (2023-10-30)": "2023-10-30",
+    "NGC 7293: The Helix Nebula (2024-10-24)": "2024-10-24",
+    "Reflections of the Ghost Nebula (2023-10-30)": "2023-10-30",
     "Hydrogen Clouds of M33 (2023-10-13)": "2023-10-13",
     "The Changing Ion Tail of Comet Pons-Brooks (2024-04-08)": "2024-04-08",
     "The Large Magellanic Cloud Galaxy (2024-10-02)": "2024-10-02",
@@ -277,6 +277,7 @@ if fetch_date:
     except Exception as e:
         st.error(f"An error occurred while fetching the APOD: {e}")
         st.info("Please ensure the date is correctly formatted (YYYY-MM-DD) and not a future date.")
+
 
 
 
