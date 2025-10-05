@@ -126,8 +126,8 @@ event_selection_key = st.sidebar.selectbox(
 selected_event_date_str = SOLAR_APOD_DATES[event_selection_key]
 
 
-# 3. Determine the final date for fetching
-# If an event is selected from the dropdown, override the manual date input
+# 3. Determining the final date for fetching
+# If an event is selected from the dropdown, then override the manual date input
 if selected_event_date_str:
     fetch_date_str = selected_event_date_str
 else:
@@ -274,3 +274,4 @@ if fetch_date:
         st.error(f"An error occurred while fetching the APOD: {e}")
 
         st.info("Please ensure the date is correctly formatted (YYYY-MM-DD) and not a future date.")
+
