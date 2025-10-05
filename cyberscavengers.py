@@ -8,6 +8,7 @@ import plotly.express as px
 import pandas as pd
 import numpy as np
 
+# --- Configuration ---
 st.set_page_config(
     page_title="NASA APOD Viewer",
     page_icon="🚀",
@@ -17,10 +18,9 @@ st.set_page_config(
 
 # === NASA APOD API ===
 API_URL = "https://api.nasa.gov/planetary/apod"
-
 API_KEY = "eG6R1CynmBgOLFdCvMEi5s0oAeTRjXNEAYlqUifW" 
 
-# --- Solar System APOD Dates for Easy Access  ---
+# --- Solar System APOD Dates for Easy Access (Confirmed Solar Events) ---
 SOLAR_APOD_DATES = {
     "Select a Solar Event Date": None,
     "Saturn's Rings (2023-09-02)": "2023-09-02",
@@ -32,12 +32,20 @@ SOLAR_APOD_DATES = {
     "Mercury Transit (2019-11-12)": "2019-11-12",
 }
 
-@st.cache_data(ttl=3600) # Cache the data for 1 hour to prevent excessive API calls
+# --- Manual Exclusion List (Dates that match keywords but are actually deep space) ---
+# Add any dates you find where the Solar System section incorrectly appears.
+EXCLUDE_DATES = {
+    "1998-04-01",  # Example: Title says 'Planet' but image is a far-off galaxy
+    "2005-07-04",  # Example: Mention of 'Sun' in a cosmic context
+}
+
+
+@st.cache_data(ttl=3600)
 def fetch_apod(date_str=None):
     """Fetch Astronomy Picture of the Day (APOD) data from NASA API"""
     params = {"api_key": API_KEY}
     if date_str:
-        params["date"] = date_str  # format: YYYY-MM-DD
+        params["date"] = date_str
     
     response = requests.get(API_URL, params=params)
     
@@ -52,7 +60,6 @@ def fetch_apod(date_str=None):
 def get_solar_system_plot(apod_body=None):
     """Generates an interactive 2D projection solar system plot with Plotly."""
     
-    # Static data for major solar system bodies (Mean Orbital Radius in AU)
     solar_system_data = {
         'Body': ['Sun', 'Mercury', 'Venus', 'Earth', 'Mars', 'Jupiter', 'Saturn', 'Uranus', 'Neptune'],
         'Radius (AU)': [0.0, 0.39, 0.72, 1.00, 1.52, 5.20, 9.58, 19.23, 30.10],
@@ -60,12 +67,10 @@ def get_solar_system_plot(apod_body=None):
     }
     df = pd.DataFrame(solar_system_data)
     
-    # Calculate x and y coordinates (simplified 2D orbit view)
     df['theta'] = np.linspace(0, 2 * np.pi, len(df), endpoint=False)
     df['x'] = df['Radius (AU)'] * np.cos(df['theta'])
     df['y'] = df['Radius (AU)'] * np.sin(df['theta'])
     
-    # Highlight the APOD focus body
     df['Highlight'] = df['Body'].apply(lambda x: 'APOD Focus' if x.lower() == apod_body.lower() else 'Solar System Body')
     
     fig = px.scatter(
@@ -79,7 +84,6 @@ def get_solar_system_plot(apod_body=None):
         title="Simplified Solar System Plane (Not to Scale)"
     )
 
-    # Customize plot appearance for a dark 'space' look
     fig.update_traces(marker=dict(line=dict(width=1, color='Black')))
     fig.update_layout(
         xaxis_title="", yaxis_title="", showlegend=True,
@@ -92,7 +96,7 @@ def get_solar_system_plot(apod_body=None):
 
 # --- Main Streamlit UI ---
 
-# --- Sidebar Controls (UPDATED SECTION) ---
+# --- Sidebar Controls ---
 
 # 1. Manual Date Input
 st.sidebar.markdown(
@@ -102,21 +106,19 @@ st.sidebar.markdown(
     """
 )
 
-# Use st.date_input for better UX, defaulting to today
 manual_date = st.sidebar.date_input(
     "Select Date:", 
     value="today", 
     max_value=date.today(),
-    min_value=date(1995, 6, 16) # APOD start date
+    min_value=date(1995, 6, 16)
 )
-# Converting the date object to the required string format
 manual_date_str = manual_date.strftime("%Y-%m-%d")
 
 
 st.sidebar.markdown("---")
 
 
-# 2. Solar Event Selector (NEW)
+# 2. Solar Event Selector
 event_selection_key = st.sidebar.selectbox(
     "✨ Or Choose a Solar System Highlight:",
     options=list(SOLAR_APOD_DATES.keys()),
@@ -126,8 +128,7 @@ event_selection_key = st.sidebar.selectbox(
 selected_event_date_str = SOLAR_APOD_DATES[event_selection_key]
 
 
-# 3. Determining the final date for fetching
-# If an event is selected from the dropdown, then override the manual date input
+# 3. Determine the final date for fetching
 if selected_event_date_str:
     fetch_date_str = selected_event_date_str
 else:
@@ -139,14 +140,12 @@ if st.sidebar.button("🚀 Fetch APOD", use_container_width=True):
     st.session_state['fetch_trigger'] = fetch_date_str
     st.session_state['fetch_by_button'] = True
 else:
-    # Initial load or date change
     if 'fetch_trigger' not in st.session_state or st.session_state.get('last_selected_date') != fetch_date_str:
         st.session_state['fetch_trigger'] = fetch_date_str
         st.session_state['fetch_by_button'] = False
         
     st.session_state['last_selected_date'] = fetch_date_str
 
-# Update the main fetch_date variable used later in the script
 fetch_date = st.session_state.get('fetch_trigger')
 
 
@@ -154,21 +153,17 @@ fetch_date = st.session_state.get('fetch_trigger')
 st.title("🌌 NASA Astronomy Picture of the Day")
 st.markdown("---")
 
-# Trigger the fetch and display logic
 if fetch_date:
     try:
         with st.spinner(f"Fetching APOD for *{fetch_date}*..."):
-            # Fetch data
             data = fetch_apod(None if fetch_date == date.today().strftime("%Y-%m-%d") else fetch_date)
             
-            # Extract data
             title = data.get("title", "Untitled APOD")
             apod_date = data.get("date", "Unknown Date")
             explanation = data.get("explanation", "No detailed description provided for this picture.")
             img_url = data.get("url")
             hd_url = data.get("hdurl")
 
-        # Celebration on button click
         if st.session_state.get('fetch_by_button', False):
             st.balloons()
             st.session_state['fetch_by_button'] = False
@@ -179,7 +174,6 @@ if fetch_date:
         st.caption(f"📅 Date: *{apod_date}*")
         st.markdown("---")
 
-        # Two-column layout for media and explanation
         col1, col2 = st.columns([7, 5]) 
 
         with col1:
@@ -187,7 +181,6 @@ if fetch_date:
             media_type = data.get("media_type", "image")
 
             if media_type == "video":
-                # Embed video directly
                 st.video(img_url)
                 st.info(f"Today's APOD is a *Video*. If it doesn't load above, [Watch on NASA/YouTube]({img_url})")
             
@@ -197,7 +190,6 @@ if fetch_date:
                     img_response.raise_for_status()
                     img = Image.open(BytesIO(img_response.content))
                     
-                    # Image with subtle border
                     st.markdown(
                         f'<div style="border: 2px solid #367c9c; border-radius: 8px; overflow: hidden;">',
                         unsafe_allow_html=True
@@ -206,7 +198,6 @@ if fetch_date:
                     st.markdown('</div>', unsafe_allow_html=True)
                     
                     if hd_url:
-                        # HD Download link
                         st.markdown(f"[🖼 Download HD Image]({hd_url})", unsafe_allow_html=True)
 
                 except requests.exceptions.HTTPError as e:
@@ -219,7 +210,6 @@ if fetch_date:
 
         with col2:
             st.subheader("Explanation")
-            # Use expander for long text
             with st.expander("Read Full Description", expanded=True):
                 st.markdown(explanation)
                 
@@ -228,13 +218,21 @@ if fetch_date:
 
         
         # -------------------------------------------------------------
-        # SOLAR SYSTEM CONTEXT AND WORKING 3D LINK
+        # SOLAR SYSTEM CONTEXT AND WORKING 3D LINK (FIXED LOGIC)
         # -------------------------------------------------------------
 
-        solar_system_keywords = ['mercury', 'venus', 'earth', 'mars', 'jupiter', 'saturn', 'uranus', 'neptune', 'moon', 'sun', 'comet', 'asteroid', 'aurora', 'planet', 'probe']
+        # Refined keyword list for better accuracy
+        solar_system_keywords = [
+            'mercury', 'venus', 'earth', 'mars', 'jupiter', 'saturn', 'uranus', 'neptune', 
+            'moon', 'sun', 'comet', 'asteroid', 'aurora', 
+            'apollo', 'iss', 'viking', 'curiosity', 'cassini', 'voyager', 'juno', 'osiris' 
+        ]
+        
+        # 1. Check if it's a Solar System APOD based on keywords
         apod_is_solar = any(keyword in title.lower() or keyword in explanation.lower() for keyword in solar_system_keywords)
-
-        if apod_is_solar:
+        
+        # 2. Final check: must be solar AND NOT in the exclusion list
+        if apod_is_solar and apod_date not in EXCLUDE_DATES:
             st.markdown("---")
             st.subheader("🔭 Location Context: Our Solar System")
 
@@ -255,8 +253,6 @@ if fetch_date:
             st.markdown("---")
 
             # 2. Add External 3D Visualization Link (Using stable base URL)
-            
-            # This is the most stable link to guarantee the external app opens.
             nasa_eyes_url = "https://eyes.nasa.gov/apps/solar-system/" 
             
             st.markdown("### 🚀 Explore the Location in 3D!")
@@ -272,6 +268,5 @@ if fetch_date:
         
     except Exception as e:
         st.error(f"An error occurred while fetching the APOD: {e}")
-
         st.info("Please ensure the date is correctly formatted (YYYY-MM-DD) and not a future date.")
 
