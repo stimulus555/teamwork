@@ -18,7 +18,7 @@ st.set_page_config(
 
 # === NASA APOD API ===
 API_URL = "https://api.nasa.gov/planetary/apod"
-API_KEY = "eG6R1CynmBgOLFdCvMEi5s0oAeTRjXNEAYlqUifW" 
+API_KEY = "1Az74dirI1HZ7ZFXyDZRLGrGYCuyAhQmEFneJVn4" 
 
 # --- Solar System APOD Dates for Easy Access (Confirmed Solar Events) ---
 SOLAR_APOD_DATES = {
@@ -277,6 +277,7 @@ if fetch_date:
     except Exception as e:
         st.error(f"An error occurred while fetching the APOD: {e}")
         st.info("Please ensure the date is correctly formatted (YYYY-MM-DD) and not a future date.")
+
 
 
 
